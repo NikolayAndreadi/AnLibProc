@@ -1,0 +1,13 @@
+!Opt PBE0 RIJCOSX def2-SD def2-SVP AutoAux SlowConv
+
+%pal
+nproc 42
+end
+
+%basis
+newgto #HE "SARC-DKH-TZVP" end
+end
+
+%scf
+MaxIter 1000
+end
