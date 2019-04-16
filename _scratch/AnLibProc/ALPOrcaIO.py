@@ -4,8 +4,18 @@ import re
 from ALPconstant import *
 
 
-# MakeInputFile - make .inp file. Requires TheoryLvl, Element, Charge, Multiplicity and XYZ
 def MakeInputFile(fn, tl, el, cg, mp, xyz):
+    """
+    Generating .inp file
+
+    :param fn: filename
+    :param tl: theory level
+    :param el: heavy atom
+    :param cg: charge
+    :param mp: multiplicity
+    :param xyz: geometry
+    :return: None
+    """
     fn = SCRATCHDIR + '/' + tl + '/' + fn + ".inp"
     f = open(fn, 'w+')
 
@@ -19,21 +29,36 @@ def MakeInputFile(fn, tl, el, cg, mp, xyz):
     f.close()
 
 
-# GetMpFromOrcaInp - get multiplicity from Orca input file. Requires filename with path
 def GetMpFromOrcaInp(content):
+    """
+    Extract multiplicity from Orca files.
+
+    :param content:  opened and read file (.inp or .out)
+    :return: multiplicity (int)
+    """
     target = content.find("xyz")
     endtar = content[target:].find('\n') + target
 
     return content[target:endtar].split()[2]
 
 
-# GetHeavyAtom - find heavy element in xyz
 def GetHeavyAtom(string):
+    """
+    Finds heavy atom in xyz set
+
+    :param string: xyz data set
+    :return: heavy atom symbol
+    """
     return [x for x in HEAVYLIST if re.search(x, string)][0]
 
 
-# GetXyzFromOrcaOut - get xyz from Orca out file. Requires filename with path
 def GetOrcaOutXyz(fn):
+    """
+    Get xyz from Orca out file.
+
+    :param fn: filename
+    :return: xyz data set
+    """
     f = open(fn, 'r')
     content = f.read()
     f.close()
@@ -45,19 +70,29 @@ def GetOrcaOutXyz(fn):
     return content[target:endtar]
 
 
-# GetOrcaOutStatus - get status of .out file. Check STATUS dict for info
 def GetOrcaOutStatus(content):
+    """
+    Get status of .out file.
+
+    :param content: opened and read .out file
+    :return: status or 0 if unknown error occures
+    """
     for key, val in STATUS.items():
         if val in content:
             return key
     return 0
 
-#get final energy from orca
+
 def GetOrcaOutE(content):
+    """
+    Get final energy from orca out
+
+    :param content: opened and read .out file
+    :return: final energy
+    """
     target = content.find("FINAL SINGLE POINT ENERGY")
     endtar = content[target:].find('\n') + target
 
-    return content[target:endtar].split()[2]
-
+    return content[target:endtar].split()[-1]
 
 # End of module ALPOrcaIO

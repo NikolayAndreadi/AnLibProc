@@ -1,10 +1,15 @@
+from collections import Counter
 from ALPCSV import *
 from ALPDelivery import *
 from ALPOrcaIO import *
 
 
-# WatchLomonosovScript - if some files requires computation and script doesn't work - start it
 def WatchLomonosovScript():
+    """
+    If some files requires computation and script doesn't work - start it
+
+    :return: None
+    """
     if not IsInLomonosovSqueue(PBE0):
         N = 0
         for file in os.listdir(SCRATCHDIR + "PBE0/"):
@@ -23,10 +28,22 @@ def WatchLomonosovScript():
             run = "sbatch -N6 -c2 " + SCRATCHDIR + "MP2.sh " + "-i " + MP2 + "/"
             os.system(run)
 
+    if not IsInLomonosovSqueue(MULT):
+        N = 0
+        for file in os.listdir(SCRATCHDIR + "MULT/"):
+            if file.endswith(".inp"):
+                N += 1
+        if N >= MULTMININP:
+            run = "sbatch -N6 -c2 " + SCRATCHDIR + "MULT.sh " + "-i " + MULT + "/"
+            os.system(run)
 
-# WatchFresh - watch FRESH directory
-# add new files to DATAFILE if not existed or corrected after error
+
 def WatchFresh():
+    """
+    Watch FRESH directory for new files. Adds new data to CSV file
+
+    :return: None
+    """
     for file in os.listdir(FRESHDIRPATH):
         if file.endswith(".inp"):
             filename = os.path.splitext(file)[0]
@@ -64,8 +81,12 @@ def WatchFresh():
                 AddLineCSV(filename, theorylvl, element, multip, state)
 
 
-# process all that crap that poor FROMSCRATCH folder containes
 def WatchFromScratch():
+    """
+    Process all files that had been calculated already
+
+    :return: None
+    """
     FromQueueToProcessed(PBE0)
     FromQueueToProcessed(MP2)
 
@@ -105,12 +126,83 @@ def WatchFromScratch():
                 FromProcessedToError(filename, theorylvl)
 
 
-# WatchFreshToQueue - sends all fresh files to _scratch
 def WatchFreshToQueue():
+    """
+    Sends all fresh files to scratch
+
+    :return: None
+    """
     for file in os.listdir(FRESHDIRPATH):
         if file.endswith(".inp"):
             filename = os.path.splitext(file)[0]
             FromFreshToQueue(filename, GetValueCSV(filename, "TheoryLvl"))
             ChangeValueCSV(filename, "Status", ST_QUEUE)
+
+
+def WatchDoneToMult():
+    """
+    If there's some done geoms - start search for the-best-multiplicity task
+
+    :return: None
+    """
+    for file in os.listdir(MP2CONVGEDPATH):
+        if file.endswith(".out"):
+            filename = os.path.splitext(file)[0]
+            xyz = GetOrcaOutXyz(filename)
+            init_mult = GetValueCSV(filename, "Multip")
+
+            for mult in range(init_mult+2, MAXMULTIP, 2):
+                MakeInputFile(filename+"__"+mult, MULT, GetValueCSV(filename, "Element"), 0, mult, xyz)
+
+            ChangeValueCSV(filename, "Status", ST_QUEUE)
+            ChangeValueCSV(filename, "TheoryLvl", MULT)
+
+
+def WatchMult():
+    """
+    Read multiplicities and get the best one
+
+    :return: None
+    """
+    if IsInLomonosovSqueue(MULT):
+        return
+
+    Summary = []
+
+    for file in os.listdir(SCRATCHDIR + "MULT/"):
+        if file.endswith(".out"):
+            filename = os.path.splitext(file)[0]
+            filename = filename.split("__")
+
+            f = open(file, "r")
+            content = f.read()
+            f.close()
+
+            Summary.append([filename[0], filename[1], GetOrcaOutE(content)])
+
+    for elem in Counter(Summary[0]).keys():
+        mp = GetValueCSV(elem, "Multip")
+        en = GetOrcaOutE(MP2CONVGEDPATH+elem+".out")
+        Summary.append([elem, mp, en])
+
+    Summary.sort(key=lambda x: x[0])
+
+    minE = 0
+    optMP = 0
+    curF = ""
+    for elem in Summary:
+        if elem[0] != curF:
+            if curF != "":
+                ChangeValueCSV(curF, "Multip", optMP)
+                ChangeValueCSV(curF, "Status", ST_MULT)
+            curF = elem[0]
+            optMP = elem[1]
+            minE = elem[2]
+        elif elem[2] < minE:
+            minE = elem[2]
+            optMP = elem[1]
+
+
+
 
 # End of module ALPWatchers

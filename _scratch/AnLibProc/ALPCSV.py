@@ -4,25 +4,43 @@ import os, csv
 from ALPconstant import *
 
 
-# CreateCSV - generating datafile if not exists
-
 def CreateCSV():
+    """
+    Creates CSV file where all mol props are contained
+
+    :return: None
+    """
     if not os.path.isfile(DATAPATH):
         with open(DATAPATH, 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=CSVHEADER)
             writer.writeheader()
 
 
-# AddLineCSV - adding new file info to CSV
-
 def AddLineCSV(fn, tl, el, mp, st, err=0):
+    """
+    Adding new task info to CSV
+
+    :param fn: filename
+    :param tl: theory level
+    :param el: heavy element
+    :param mp: multiplicity
+    :param st: state
+    :param err: error code
+    :return: None
+    """
     with open(DATAPATH, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow([fn, tl, el, mp, st, err])
 
 
-# GetValueCSV - get FIELD value by FILENAME
 def GetValueCSV(fn, field):
+    """
+    Get field value from CSV
+
+    :param fn: filename whose value we want to extract
+    :param field: parameter whose value we want to extract
+    :return: value of parameter for this filename
+    """
     with open(DATAPATH, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
@@ -32,6 +50,14 @@ def GetValueCSV(fn, field):
 
 # ChangeValueCSV - change some FIELD value to VALUE for FILENAME
 def ChangeValueCSV(fn, field, value):
+    """
+    Change some field value to new for some filename
+
+    :param fn: filename whose value we want to change
+    :param field: what parameter we want to change
+    :param value: new value
+    :return: None
+    """
     with open(DATAPATH, 'r') as csvfile:
         reader = csv.reader(csvfile)
         lines = list(reader)
@@ -45,8 +71,13 @@ def ChangeValueCSV(fn, field, value):
         writer.writerows(lines)
 
 
-# IsFileInCSV - returns true if FILENAME is already in datafile
 def IsFileInCSV(fn):
+    """
+    Checks if file is already in CSV
+
+    :param fn: filename we want to check
+    :return: True if already in CSV
+    """
     with open(DATAPATH, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:

@@ -4,23 +4,32 @@ from ALPCSV import ChangeValueCSV
 from subprocess import check_output
 
 
-# FromFreshToQueue - accept all fresh files to queue
 def FromFreshToQueue(fn, tl):
+    """
+    Move all fresh files to queue (scratch directory)
+
+    :param fn: filename
+    :param tl: theory level
+    :return: None
+    """
     source = FRESHDIRPATH + fn + ".inp"
     destin = SCRATCHDIR + tl + '/' + fn + ".inp"
     os.rename(source, destin)
 
 
-# IsInLomonosovSqueue - returns true if orca script still running
 def IsInLomonosovSqueue(tl):
+    """
+    Is script with some theory level still running
+
+    :param tl: theory level
+    :return: True if still running
+    """
     result = check_output(LOMSQUEUECMD, shell=True).decode('ascii')
 
     if result.find(tl) != -1:
         return True
     else:
         return False
-
-    # FromQueueToProcessed
 
 
 '''
@@ -36,8 +45,14 @@ seems to be the shortest way to make things work
 
 
 def FromQueueToProcessed(tl):
+    """
+    Move calculated files to script folder
+
+    :param tl: theory level
+    :return: None
+    """
     if IsInLomonosovSqueue(tl):
-        return 0
+        return
 
     dirn = SCRATCHDIR + tl + '/'
     for file in os.listdir(dirn):
@@ -63,20 +78,26 @@ def FromQueueToProcessed(tl):
             os.remove(file)
 
 
-# FromProcessedToDone - move out and gbw to DONE directory, put DONE flag
 def FromProcessedToDone(fn):
+    """
+    Move files to DONE directory if MP2 geom opt task succeeded
+
+    :param fn: filename
+    :return: None
+    """
     source = FROMSCRATCHDIR + fn + ".out"
     destin = MP2CONVGEDPATH + fn + ".out"
     os.rename(source, destin)
 
-    source = FROMSCRATCHDIR + fn + ".gbw"
-    if os.path.isfile(source):
-        destin = MP2CONVGEDPATH + fn + ".gbw"
-        os.rename(source, destin)
 
-
-# It means we delete .out file and move .gbw to ToScratch
 def FromProcessedToQueue(fn, tl):
+    """
+    Removes .out file and move .gbw to scratch directory. Used if geom opt is not succeeded.
+
+    :param fn: filename
+    :param tl: theory level
+    :return: None
+    """
     f = FROMSCRATCHDIR + fn + ".out"
     os.remove(f)
     f = FROMSCRATCHDIR + fn + ".gbw"
@@ -85,8 +106,14 @@ def FromProcessedToQueue(fn, tl):
         os.rename(f, destin)
 
 
-# If error occures, delete gbw file (seemes its broken already) and replace to err folder
 def FromProcessedToError(fn, tl):
+    """
+    If error occures, delete gbw file (seemes its broken already) and replace to err folder
+
+    :param fn: filename
+    :param tl: theory level
+    :return: None
+    """
     source = FROMSCRATCHDIR + fn + ".out"
     destin = FAILEDPATH + tl + '/' + fn + ".out"
     os.rename(source, destin)

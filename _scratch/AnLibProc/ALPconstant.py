@@ -18,7 +18,7 @@ CSVHEADER = ["Filename", "TheoryLvl", "Element", "Multip", "Status", "Errcode"]
 # list of heavy elements
 HEAVYLIST = ["Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf"]
 
-# Theory levels. Just for saving time and butt
+# Theory levels. Just for saving time
 PBE0 = "PBE0"
 MP2 = "MP2"
 MULT = "MULT"
@@ -45,11 +45,15 @@ ST_ERR = "ERR"
 # when MP2 calculation done
 ST_DONE = "DONE"
 # when target multiplicity is found out
-ST_MULT = "DONE+"
+ST_MULT = "DONE+MULT"
 
 # min files needed for script to run
 PBE0MININP = 1
 MP2MININP = 1
+MULTMININP = 1
+
+# max multiplicity for mp-search task
+MAXMULTIP = 7
 
 # SQUEUE LOMONOSOV SHELL COMMAND
 LOMSQUEUECMD = "squeue -u nikolayandreadi_1705"
