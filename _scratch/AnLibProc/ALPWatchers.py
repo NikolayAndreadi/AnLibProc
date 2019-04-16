@@ -202,7 +202,4 @@ def WatchMult():
             minE = elem[2]
             optMP = elem[1]
 
-
-
-
 # End of module ALPWatchers
