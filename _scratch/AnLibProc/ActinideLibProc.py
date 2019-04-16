@@ -1,4 +1,3 @@
-from ALPCSV      import *
 from ALPWatchers import *
 
 CreateCSV()

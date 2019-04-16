@@ -18,18 +18,18 @@ done
 #set internal flags
 while getopts ":i:" Option
 do
-  case $Option in
+  case ${Option} in
     i) INPUT=`pwd`${OPTARG}
-       cd $INPUT ;;
+       cd ${INPUT} ;;
     esac
     done
     shift $(($OPTIND - 1))
 
-exec 1>$INPUT/log.log
-exec 2>$INPUT/err_log.log
+exec 1>${INPUT}/log.log
+exec 2>${INPUT}/err_log.log
 
 #start computation
-for filename in `find $INPUT -type f -name \*.inp`
+for filename in `find ${INPUT} -type f -name \*.inp`
 do
-	/home/nikolayandreadi_1705/_scratch/orca/orca $filename > $(basename "$filename" | cut -d. -f1).out
+	/home/nikolayandreadi_1705/_scratch/orca/orca ${filename} > $(basename "$filename" | cut -d. -f1).out
 done
