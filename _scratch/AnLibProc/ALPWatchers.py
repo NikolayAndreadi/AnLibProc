@@ -190,11 +190,15 @@ def WatchMult():
     minE = 0
     optMP = 0
     curF = ""
+
     for elem in Summary:
         if elem[0] != curF:
             if curF != "":
                 ChangeValueCSV(curF, "Multip", optMP)
                 ChangeValueCSV(curF, "Status", ST_MULT)
+                source = FROMSCRATCHDIR + curF + ".gbw"
+                destin = MP2CONVGEDPATH + curF + ".gbw"
+                os.rename(source, destin)
             curF = elem[0]
             optMP = elem[1]
             minE = elem[2]
