@@ -1,3 +1,5 @@
+# ALPWatchers - module for target file processing
+
 from collections import Counter
 from ALPCSV import *
 from ALPDelivery import *
@@ -16,7 +18,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= PBE0MININP:
-            run = "sbatch -N3 " + SCRATCHDIR + "PBE0.sh " + "-i " + PBE0 + "/"
+            run = "sbatch -N3 " + SCRATCHDIR + "PBE0.sh -i" + SCRATCHDIR + "PBE0/"
             os.system(run)
 
     if not IsInLomonosovSqueue(MP2):
@@ -25,7 +27,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MP2MININP:
-            run = "sbatch -N6 -c2 " + SCRATCHDIR + "MP2.sh " + "-i " + MP2 + "/"
+            run = "sbatch -N6 -c2 " + SCRATCHDIR + "MP2.sh -i" + SCRATCHDIR + "MP2/"
             os.system(run)
 
     if not IsInLomonosovSqueue(MULT):
@@ -34,7 +36,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MULTMININP:
-            run = "sbatch -N6 -c2 " + SCRATCHDIR + "MULT.sh " + "-i " + MULT + "/"
+            run = "sbatch -N6 -c2 " + SCRATCHDIR + "MULT.sh -i" + SCRATCHDIR + "MULT/"
             os.system(run)
 
 
@@ -164,7 +166,7 @@ def WatchMult():
 
     :return: None
     """
-    if IsInLomonosovSqueue(MULT):
+    if IsInLomonosovSqueue(MULT) or (not IsAnyTask(MULT)):
         return
 
     Summary = []

@@ -85,4 +85,19 @@ def IsFileInCSV(fn):
                 return True
         return False
 
+
+def IsAnyTask(tl):
+    """
+    Is task with theory level exists
+
+    :param tl: Theory level
+    :return: True if exists
+    """
+    with open(DATAPATH, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row["TheoryLvl"] == tl:
+                return True
+        return False
+
 # End of module ALPCSV

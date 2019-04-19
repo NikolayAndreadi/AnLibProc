@@ -1,4 +1,7 @@
+# ALPDelivery - module for file management
+
 import os
+#import platform
 from ALPconstant import *
 from ALPCSV import ChangeValueCSV
 from subprocess import check_output
@@ -19,6 +22,7 @@ def FromFreshToQueue(fn, tl):
 
 def IsInLomonosovSqueue(tl):
     """
+    platform.system()
     Is script with some theory level still running
 
     :param tl: theory level
