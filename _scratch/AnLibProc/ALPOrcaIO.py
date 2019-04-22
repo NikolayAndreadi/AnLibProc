@@ -83,6 +83,19 @@ def GetOrcaOutStatus(content):
     return 0
 
 
+def GetOrcaOutTaskStatus(content):
+    """
+    Get ending status of .out file.
+
+    :param content: opened and read .out file
+    :return: status or 0 if unknown error occures
+    """
+    for key, val in TASK_STATUS.items():
+        if val in content:
+            return key
+    return 0
+
+
 def GetOrcaOutE(content):
     """
     Get final energy from orca out

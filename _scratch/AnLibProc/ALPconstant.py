@@ -7,13 +7,13 @@ DATAPATH = "./DATA/Data.csv"
 FRESHDIRPATH = "./FILES/1.FRESH/"
 
 # directory for ready-to-run inputs
-SCRATCHDIR = "/home/nikolayandreadi_1705/_scratch/"
+SCRATCHDIR = "../"  # "/home/nikolayandreadi_1705/_scratch/"
 FROMSCRATCHDIR = "./FILES/2.FromScratch/"
 FAILEDPATH = "./FILES/3.Failed/"
 MP2CONVGEDPATH = "./FILES/4.Done-MP2/"
 
 # field names in CSV
-CSVHEADER = ["Filename", "TheoryLvl", "Element", "Multip", "Status", "Errcode"]
+CSVHEADER = ["Filename", "TheoryLvl", "Element", "Multip", "Status", "Errcode", "Iter_num"]
 
 # list of heavy elements
 HEAVYLIST = ["Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf"]
@@ -29,6 +29,11 @@ STATUS = {
     1: "HURRAY",
     2: "The optimization did not converge but reached",
     3: "SCF NOT CONVERGED AFTER"
+}
+
+TASK_STATUS = {
+    1: "****ORCA TERMINATED NORMALLY****",
+    2: "*** Process received signal ***"
 }
 
 """
@@ -50,10 +55,13 @@ ST_MULT = "DONE+MULT"
 # min files needed for script to run
 PBE0MININP = 1
 MP2MININP = 1
-MULTMININP = 1
+MULTMININP = 3
 
 # max multiplicity for mp-search task
 MAXMULTIP = 7
+
+# max iteration number
+MAX_ITER = 3
 
 # SQUEUE LOMONOSOV SHELL COMMAND
 LOMSQUEUECMD = "squeue -u nikolayandreadi_1705"

@@ -1,7 +1,6 @@
 # ALPWatchers - module for target file processing
 
 from collections import Counter
-from ALPCSV import *
 from ALPDelivery import *
 from ALPOrcaIO import *
 
@@ -70,6 +69,7 @@ def WatchFresh():
                 if GetValueCSV(filename, "Status") == ST_ERR:
                     ChangeValueCSV(filename, "TheoryLvl", theorylvl)
                     ChangeValueCSV(filename, "Errcode", 0)
+                    ChangeValueCSV(filename, "Iter_num", 0)
                     continue
                 else:
                     source = FRESHDIRPATH + file
@@ -100,6 +100,7 @@ def WatchFromScratch():
             f.close()
 
             status = GetOrcaOutStatus(datafile)
+
             if status == 1:  # HURRAY
                 if GetValueCSV(filename, "TheoryLvl") == PBE0:
                     element = GetValueCSV(filename, "Element")
@@ -108,6 +109,7 @@ def WatchFromScratch():
                     ChangeValueCSV(filename, "TheoryLvl", MP2)
                     FromProcessedToQueue(filename, PBE0)
                     ChangeValueCSV(filename, "Status", ST_QUEUE)
+                    ChangeValueCSV(filename, "Iter_num", 0)
 
                 else:  # DONE
                     FromProcessedToDone(filename)
@@ -116,9 +118,19 @@ def WatchFromScratch():
             elif status == 2:  # Repeat
                 element = GetValueCSV(filename, "Element")
                 theorylvl = GetValueCSV(filename, "TheoryLvl")
+
+                ChangeValueCSV(filename, "Iter_num", GetValueCSV(filename, "Iter_num") + 1)
+
+                if GetValueCSV(filename, "Iter_num") > MAX_ITER:
+                    ChangeValueCSV(filename, "Status", ST_ERR)
+                    ChangeValueCSV(filename, "Errcode", "TooManyIterations")
+                    theorylvl = GetValueCSV(filename, "TheoryLvl")
+                    FromProcessedToError(filename, theorylvl)
+                    continue
+
                 multip = GetValueCSV(filename, "Multip")
                 MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
-                FromProcessedToQueue(filename, PBE0)
+                FromProcessedToQueue(filename, theorylvl)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
 
             else:  # HOUSTON WE HAVE A PR...
@@ -126,6 +138,7 @@ def WatchFromScratch():
                 ChangeValueCSV(filename, "Errcode", status)
                 theorylvl = GetValueCSV(filename, "TheoryLvl")
                 FromProcessedToError(filename, theorylvl)
+                ChangeValueCSV(filename, "Iter_num", 0)
 
 
 def WatchFreshToQueue():
@@ -154,7 +167,7 @@ def WatchDoneToMult():
             init_mult = GetValueCSV(filename, "Multip")
 
             for mult in range(init_mult+2, MAXMULTIP, 2):
-                MakeInputFile(filename+"__"+mult, MULT, GetValueCSV(filename, "Element"), 0, mult, xyz)
+                MakeInputFile(filename+"__"+str(mult), MULT, GetValueCSV(filename, "Element"), 0, mult, xyz)
 
             ChangeValueCSV(filename, "Status", ST_QUEUE)
             ChangeValueCSV(filename, "TheoryLvl", MULT)

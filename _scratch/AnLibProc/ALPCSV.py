@@ -16,7 +16,7 @@ def CreateCSV():
             writer.writeheader()
 
 
-def AddLineCSV(fn, tl, el, mp, st, err=0):
+def AddLineCSV(fn, tl, el, mp, st, err=0, iter_num=0):
     """
     Adding new task info to CSV
 
@@ -26,11 +26,12 @@ def AddLineCSV(fn, tl, el, mp, st, err=0):
     :param mp: multiplicity
     :param st: state
     :param err: error code
+    :param iter_num: retry number of iterations
     :return: None
     """
     with open(DATAPATH, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow([fn, tl, el, mp, st, err])
+        writer.writerow([fn, tl, el, mp, st, err, iter_num])
 
 
 def GetValueCSV(fn, field):

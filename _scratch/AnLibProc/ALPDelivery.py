@@ -1,10 +1,7 @@
 # ALPDelivery - module for file management
 
-import os
-#import platform
-from ALPconstant import *
-from ALPCSV import ChangeValueCSV
-from subprocess import check_output
+from ALPCSV import *
+from ALPOrcaIO import *
 
 
 def FromFreshToQueue(fn, tl):
@@ -28,13 +25,17 @@ def IsInLomonosovSqueue(tl):
     :param tl: theory level
     :return: True if still running
     """
+    return False
+
+
+"""
     result = check_output(LOMSQUEUECMD, shell=True).decode('ascii')
 
     if result.find(tl) != -1:
         return True
     else:
         return False
-
+"""
 
 '''
 This part is lilbit tricky:
@@ -63,6 +64,20 @@ def FromQueueToProcessed(tl):
         if file.endswith(".inp"):
             filename = os.path.splitext(file)[0]
             outfile = dirn + filename + ".out"
+
+            f = open(dirn + file, "r")
+            datafile = f.read()
+            f.close()
+
+            end_status = GetOrcaOutTaskStatus(datafile)
+
+            if end_status > 1:
+                element = GetValueCSV(filename, "Element")
+                theorylvl = GetValueCSV(filename, "TheoryLvl")
+                multip = GetValueCSV(filename, "Multip")
+                os.remove(dirn + filename + ".inp")
+                MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(dirn + file))
+
             if os.path.isfile(outfile):
                 destin = FROMSCRATCHDIR + filename + ".out"
                 os.rename(outfile, destin)
