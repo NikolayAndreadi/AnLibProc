@@ -93,8 +93,8 @@ def FromQueueToProcessed(tl):
                 os.remove(outfile)
 
     for file in os.listdir(dirn):
-        if not file.endswith(".inp"):
-            os.remove(file)
+        if (not file.endswith(".inp")) and (not file.endswith(".keep")):
+            os.remove(dirn+file)
 
 
 def FromProcessedToDone(fn):

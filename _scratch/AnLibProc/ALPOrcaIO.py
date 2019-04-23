@@ -106,6 +106,6 @@ def GetOrcaOutE(content):
     target = content.find("FINAL SINGLE POINT ENERGY")
     endtar = content[target:].find('\n') + target
 
-    return content[target:endtar].split()[-1]
+    return content[target:endtar].split()
 
 # End of module ALPOrcaIO

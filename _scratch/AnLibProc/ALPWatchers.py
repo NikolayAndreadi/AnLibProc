@@ -1,6 +1,5 @@
 # ALPWatchers - module for target file processing
 
-from collections import Counter
 from ALPDelivery import *
 from ALPOrcaIO import *
 
@@ -119,7 +118,7 @@ def WatchFromScratch():
                 element = GetValueCSV(filename, "Element")
                 theorylvl = GetValueCSV(filename, "TheoryLvl")
 
-                ChangeValueCSV(filename, "Iter_num", GetValueCSV(filename, "Iter_num") + 1)
+                ChangeValueCSV(filename, "Iter_num", str(GetValueCSV(filename, "Iter_num")+1))
 
                 if GetValueCSV(filename, "Iter_num") > MAX_ITER:
                     ChangeValueCSV(filename, "Status", ST_ERR)
@@ -163,10 +162,10 @@ def WatchDoneToMult():
     for file in os.listdir(MP2CONVGEDPATH):
         if file.endswith(".out"):
             filename = os.path.splitext(file)[0]
-            xyz = GetOrcaOutXyz(filename)
+            xyz = GetOrcaOutXyz(MP2CONVGEDPATH+filename+".out")
             init_mult = GetValueCSV(filename, "Multip")
 
-            for mult in range(init_mult+2, MAXMULTIP, 2):
+            for mult in range(int(init_mult)+2, MAXMULTIP, 2):
                 MakeInputFile(filename+"__"+str(mult), MULT, GetValueCSV(filename, "Element"), 0, mult, xyz)
 
             ChangeValueCSV(filename, "Status", ST_QUEUE)
@@ -189,36 +188,57 @@ def WatchMult():
             filename = os.path.splitext(file)[0]
             filename = filename.split("__")
 
-            f = open(file, "r")
+            f = open(SCRATCHDIR + "MULT/"+file, "r")
             content = f.read()
             f.close()
 
-            Summary.append([filename[0], filename[1], GetOrcaOutE(content)])
+            Summary.append([filename[0], filename[1], GetOrcaOutE(content)[-1]])
 
-    for elem in Counter(Summary[0]).keys():
+    def get__column(matrix, i):
+        return [row[i] for row in matrix]
+    Summ_names = get__column(Summary, 0)
+    Summ_names = list(dict.fromkeys(Summ_names))
+    for elem in Summ_names:
         mp = GetValueCSV(elem, "Multip")
-        en = GetOrcaOutE(MP2CONVGEDPATH+elem+".out")
+        f = open(MP2CONVGEDPATH+elem+".out","r")
+        content = f.read()
+        f.close()
+        en = GetOrcaOutE(content)[-1]
         Summary.append([elem, mp, en])
 
     Summary.sort(key=lambda x: x[0])
 
     minE = 0
     optMP = 0
-    curF = ""
+    curF = "Dev__none"
+
+    print(Summary)
 
     for elem in Summary:
-        if elem[0] != curF:
-            if curF != "":
+        if curF != elem[0]:
+            if curF == "Dev__none":
+                curF = elem[0]
+                minE = elem[2]
+                optMP = elem[1]
+            else:
                 ChangeValueCSV(curF, "Multip", optMP)
                 ChangeValueCSV(curF, "Status", ST_MULT)
                 source = FROMSCRATCHDIR + curF + ".gbw"
-                destin = MP2CONVGEDPATH + curF + ".gbw"
-                os.rename(source, destin)
-            curF = elem[0]
-            optMP = elem[1]
+                if os.path.isfile(source):
+                    destin = MP2CONVGEDPATH + curF + ".gbw"
+                    os.rename(source, destin)
+                curF = elem[0]
+                minE = elem[2]
+                optMP = elem[1]
+        elif float(elem[2]) < float(minE):
             minE = elem[2]
-        elif elem[2] < minE:
-            minE = elem[2]
             optMP = elem[1]
+
+    ChangeValueCSV(curF, "Multip", optMP)
+    ChangeValueCSV(curF, "Status", ST_MULT)
+    source = FROMSCRATCHDIR + curF + ".gbw"
+    if os.path.isfile(source):
+        destin = MP2CONVGEDPATH + curF + ".gbw"
+        os.rename(source, destin)
 
 # End of module ALPWatchers

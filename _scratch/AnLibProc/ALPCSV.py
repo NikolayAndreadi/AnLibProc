@@ -1,6 +1,7 @@
 # ALPCSV - module for processing CSV datafile
 
-import os, csv
+import os
+import csv
 from ALPconstant import *
 
 
