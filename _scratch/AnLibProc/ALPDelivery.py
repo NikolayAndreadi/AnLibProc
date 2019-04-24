@@ -1,5 +1,7 @@
 # ALPDelivery - module for file management
 
+from subprocess import check_output
+
 from ALPCSV import *
 from ALPOrcaIO import *
 
@@ -25,17 +27,17 @@ def IsInLomonosovSqueue(tl):
     :param tl: theory level
     :return: True if still running
     """
-    return False
 
+    if platform.system() == "Windows":
+        return False
 
-"""
     result = check_output(LOMSQUEUECMD, shell=True).decode('ascii')
 
     if result.find(tl) != -1:
         return True
     else:
         return False
-"""
+
 
 '''
 This part is lilbit tricky:
@@ -60,40 +62,37 @@ def FromQueueToProcessed(tl):
         return
 
     dirn = SCRATCHDIR + tl + '/'
+
     for file in os.listdir(dirn):
-        if file.endswith(".inp"):
+        if file.endswith(".out"):
             filename = os.path.splitext(file)[0]
-            outfile = dirn + filename + ".out"
+            outfile = dirn + file
 
-            f = open(dirn + file, "r")
-            datafile = f.read()
-            f.close()
+            if "atom" in filename:
+                os.remove(outfile)
+                outfile = dirn + filename + ".inp"
+                if os.path.exists(outfile):
+                    os.remove(outfile)
+                outfile = dirn + filename + ".gbw"
+                if os.path.exists(outfile):
+                    os.remove(outfile)
+                continue
 
-            end_status = GetOrcaOutTaskStatus(datafile)
+            destin = FROMSCRATCHDIR + filename + ".out"
+            os.rename(outfile, destin)
 
-            if end_status > 1:
-                element = GetValueCSV(filename, "Element")
-                theorylvl = GetValueCSV(filename, "TheoryLvl")
-                multip = GetValueCSV(filename, "Multip")
-                os.remove(dirn + filename + ".inp")
-                MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(dirn + file))
-
+            outfile = dirn + filename + ".gbw"
             if os.path.isfile(outfile):
-                destin = FROMSCRATCHDIR + filename + ".out"
+                destin = FROMSCRATCHDIR + filename + ".gbw"
                 os.rename(outfile, destin)
 
-                outfile = dirn + filename + ".gbw"
-                if os.path.isfile(outfile):
-                    destin = FROMSCRATCHDIR + filename + ".gbw"
-                    os.rename(outfile, destin)
+            ChangeValueCSV(filename, "Status", ST_COMPUTED)
 
-                ChangeValueCSV(filename, "Status", ST_COMPUTED)
-
-                outfile = dirn + filename + ".inp"
-                os.remove(outfile)
+            outfile = dirn + filename + ".inp"
+            os.remove(outfile)
 
     for file in os.listdir(dirn):
-        if (not file.endswith(".inp")) and (not file.endswith(".keep")):
+        if (not file.endswith(".inp")) and (not file.endswith(".keep")) and (not file.endswith(".gbw")):
             os.remove(dirn+file)
 
 
@@ -125,12 +124,13 @@ def FromProcessedToQueue(fn, tl):
         os.rename(f, destin)
 
 
-def FromProcessedToError(fn, tl):
+def FromProcessedToError(fn, tl, saveGbw=True):
     """
     If error occures, delete gbw file (seemes its broken already) and replace to err folder
 
     :param fn: filename
     :param tl: theory level
+    :param saveGbw: do we need .gbw or not (it is already broken)
     :return: None
     """
     source = FROMSCRATCHDIR + fn + ".out"
@@ -139,6 +139,10 @@ def FromProcessedToError(fn, tl):
 
     source = FROMSCRATCHDIR + fn + ".gbw"
     if os.path.isfile(source):
-        os.remove(source)
+        if saveGbw:
+            destin = FAILEDPATH + tl + '/' + fn + ".gbw"
+            os.rename(source, destin)
+        else:
+            os.remove(source)
 
 # End of module ALPDelivery

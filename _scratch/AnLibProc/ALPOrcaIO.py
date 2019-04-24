@@ -1,10 +1,11 @@
 # ALPOrcaIO - module for processing ORCA .inp and .out files
 
 import re
+
 from ALPconstant import *
 
 
-def MakeInputFile(fn, tl, el, cg, mp, xyz):
+def MakeInputFile(fn, tl, el, cg, mp, xyz, retry=False):
     """
     Generating .inp file
 
@@ -14,6 +15,7 @@ def MakeInputFile(fn, tl, el, cg, mp, xyz):
     :param cg: charge
     :param mp: multiplicity
     :param xyz: geometry
+    :param retry: if true - delete guess HCore line
     :return: None
     """
     fn = SCRATCHDIR + '/' + tl + '/' + fn + ".inp"
@@ -24,6 +26,8 @@ def MakeInputFile(fn, tl, el, cg, mp, xyz):
     smp.close()
 
     tmpstr = tmpstr.replace("#HE", el)
+    if retry:
+        tmpstr = tmpstr.replace("Guess HCore", "")
     tmpstr += "\n\n* xyz " + str(cg) + ' ' + str(mp) + '\n' + xyz + "\n*"
     f.write(tmpstr)
     f.close()
@@ -78,19 +82,6 @@ def GetOrcaOutStatus(content):
     :return: status or 0 if unknown error occures
     """
     for key, val in STATUS.items():
-        if val in content:
-            return key
-    return 0
-
-
-def GetOrcaOutTaskStatus(content):
-    """
-    Get ending status of .out file.
-
-    :param content: opened and read .out file
-    :return: status or 0 if unknown error occures
-    """
-    for key, val in TASK_STATUS.items():
         if val in content:
             return key
     return 0

@@ -12,6 +12,7 @@ end
 
 %scf
 MaxIter 2000
+Guess HCore
 end
 
 %method

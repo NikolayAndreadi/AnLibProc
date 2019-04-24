@@ -19,7 +19,7 @@ done
 while getopts ":i:" Option
 do
   case ${Option} in
-    i) INPUT=`pwd`${OPTARG}
+    i) INPUT=${OPTARG}
        cd ${INPUT} ;;
     esac
     done

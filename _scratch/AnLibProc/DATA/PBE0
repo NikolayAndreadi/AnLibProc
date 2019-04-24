@@ -10,4 +10,5 @@ end
 
 %scf
 MaxIter 1000
+Guess HCore
 end

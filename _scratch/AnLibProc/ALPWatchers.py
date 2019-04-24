@@ -10,6 +10,9 @@ def WatchLomonosovScript():
 
     :return: None
     """
+    if platform.system() == "Windows":
+        return
+
     if not IsInLomonosovSqueue(PBE0):
         N = 0
         for file in os.listdir(SCRATCHDIR + "PBE0/"):
@@ -106,7 +109,7 @@ def WatchFromScratch():
                     multip = GetValueCSV(filename, "Multip")
                     MakeInputFile(filename, MP2, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
                     ChangeValueCSV(filename, "TheoryLvl", MP2)
-                    FromProcessedToQueue(filename, PBE0)
+                    FromProcessedToQueue(filename, MP2)
                     ChangeValueCSV(filename, "Status", ST_QUEUE)
                     ChangeValueCSV(filename, "Iter_num", 0)
 
@@ -118,9 +121,9 @@ def WatchFromScratch():
                 element = GetValueCSV(filename, "Element")
                 theorylvl = GetValueCSV(filename, "TheoryLvl")
 
-                ChangeValueCSV(filename, "Iter_num", str(GetValueCSV(filename, "Iter_num")+1))
+                ChangeValueCSV(filename, "Iter_num", str(int(GetValueCSV(filename, "Iter_num")) + 1))
 
-                if GetValueCSV(filename, "Iter_num") > MAX_ITER:
+                if int(GetValueCSV(filename, "Iter_num")) > MAX_ITER:
                     ChangeValueCSV(filename, "Status", ST_ERR)
                     ChangeValueCSV(filename, "Errcode", "TooManyIterations")
                     theorylvl = GetValueCSV(filename, "TheoryLvl")
@@ -128,16 +131,42 @@ def WatchFromScratch():
                     continue
 
                 multip = GetValueCSV(filename, "Multip")
-                MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
+                MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file), True)
                 FromProcessedToQueue(filename, theorylvl)
+                ChangeValueCSV(filename, "Status", ST_QUEUE)
+
+            elif status == 5:  # create with HCore
+                element = GetValueCSV(filename, "Element")
+                theorylvl = GetValueCSV(filename, "TheoryLvl")
+                multip = GetValueCSV(filename, "Multip")
+                MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file), False)
+                FromProcessedToQueue(filename, theorylvl)
+                ChangeValueCSV(filename, "Status", ST_QUEUE)
+
+            elif status == 4:  # wrong element, replace
+                element = GetHeavyAtom(GetOrcaOutXyz(FROMSCRATCHDIR + file))
+                multip = GetValueCSV(filename, "Multip")
+                tl = GetValueCSV(filename, "TheoryLvl")
+                MakeInputFile(filename, tl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
+                FromProcessedToQueue(filename, tl)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
 
             else:  # HOUSTON WE HAVE A PR...
                 ChangeValueCSV(filename, "Status", ST_ERR)
-                ChangeValueCSV(filename, "Errcode", status)
                 theorylvl = GetValueCSV(filename, "TheoryLvl")
-                FromProcessedToError(filename, theorylvl)
+                FromProcessedToError(filename, theorylvl, False)
                 ChangeValueCSV(filename, "Iter_num", 0)
+
+                if status == 0:
+                    ChangeValueCSV(filename, "Errcode", "Unknown error")
+                elif status == 3:
+                    ChangeValueCSV(filename, "Errcode", "SCF not conv")
+                elif status == 6:
+                    ChangeValueCSV(filename, "Errcode", "CP-SCF not conv")
+                elif status == 7:
+                    ChangeValueCSV(filename, "Errcode", "Lambda eq not conv")
+                elif status == 8:
+                    ChangeValueCSV(filename, "Errcode", "Out of memory")
 
 
 def WatchFreshToQueue():
@@ -200,7 +229,7 @@ def WatchMult():
     Summ_names = list(dict.fromkeys(Summ_names))
     for elem in Summ_names:
         mp = GetValueCSV(elem, "Multip")
-        f = open(MP2CONVGEDPATH+elem+".out","r")
+        f = open(MP2CONVGEDPATH + elem + ".out", "r")
         content = f.read()
         f.close()
         en = GetOrcaOutE(content)[-1]

@@ -1,5 +1,7 @@
 # ALPconstant - module with all required constants: paths, names, etc.
 
+import platform
+
 # where datafile exists
 DATAPATH = "./DATA/Data.csv"
 
@@ -7,7 +9,10 @@ DATAPATH = "./DATA/Data.csv"
 FRESHDIRPATH = "./FILES/1.FRESH/"
 
 # directory for ready-to-run inputs
-SCRATCHDIR = "../"  # "/home/nikolayandreadi_1705/_scratch/"
+if platform.system() == "Windows":
+    SCRATCHDIR = "../"
+else:
+    SCRATCHDIR = "/home/nikolayandreadi_1705/_scratch/"
 FROMSCRATCHDIR = "./FILES/2.FromScratch/"
 FAILEDPATH = "./FILES/3.Failed/"
 MP2CONVGEDPATH = "./FILES/4.Done-MP2/"
@@ -28,12 +33,12 @@ MULT = "MULT"
 STATUS = {
     1: "HURRAY",
     2: "The optimization did not converge but reached",
-    3: "SCF NOT CONVERGED AFTER"
-}
-
-TASK_STATUS = {
-    1: "****ORCA TERMINATED NORMALLY****",
-    2: "*** Process received signal ***"
+    3: "SCF NOT CONVERGED AFTER",
+    4: "There are no main   basis functions on atom number",
+    5: "Error encountered when trying to calculate the atomic fitting density!",
+    6: "THE CP-SCF CALCULATION IS UNCONVERGED",
+    7: "The lambda equations have not converged",
+    8: "OUT OF MEMORY ERROR"
 }
 
 """
