@@ -60,7 +60,7 @@ ST_MULT = "DONE+MULT"
 # min files needed for script to run
 PBE0MININP = 1
 MP2MININP = 1
-MULTMININP = 3
+MULTMININP = 2
 
 # max multiplicity for mp-search task
 MAXMULTIP = 7

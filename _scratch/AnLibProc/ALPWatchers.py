@@ -19,7 +19,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= PBE0MININP:
-            run = "sbatch -N3 " + SCRATCHDIR + "PBE0.sh -i" + SCRATCHDIR + "PBE0/"
+            run = "sbatch -N3 -t 48:00:00" + SCRATCHDIR + "PBE0.sh -i" + SCRATCHDIR + "PBE0/"
             os.system(run)
 
     if not IsInLomonosovSqueue(MP2):
@@ -204,10 +204,14 @@ def WatchDoneToMult():
 def WatchMult():
     """
     Read multiplicities and get the best one
+    TODO: there is no check whether all multiplicities were calculated correctly (for one molecule)
 
     :return: None
     """
-    if IsInLomonosovSqueue(MULT) or (not IsAnyTask(MULT)):
+    if IsInLomonosovSqueue(MULT):
+        return
+
+    if not IsAnyTask(MULT):
         return
 
     Summary = []
@@ -240,8 +244,6 @@ def WatchMult():
     minE = 0
     optMP = 0
     curF = "Dev__none"
-
-    print(Summary)
 
     for elem in Summary:
         if curF != elem[0]:
