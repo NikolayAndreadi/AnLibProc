@@ -19,7 +19,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= PBE0MININP:
-            run = "sbatch -N3 -t 48:00:00" + SCRATCHDIR + "PBE0.sh -i" + SCRATCHDIR + "PBE0/"
+            run = "sbatch -N3 -t 48:00:00 " + SCRATCHDIR + "PBE0.sh -i" + SCRATCHDIR + "PBE0/"
             os.system(run)
 
     if not IsInLomonosovSqueue(MP2):
