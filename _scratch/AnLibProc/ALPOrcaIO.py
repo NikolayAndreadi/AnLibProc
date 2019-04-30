@@ -33,17 +33,18 @@ def MakeInputFile(fn, tl, el, cg, mp, xyz, retry=False):
     f.close()
 
 
-def GetMpFromOrcaInp(content):
+def GetMpFromOrcaInp(content, MultOrCharge):
     """
     Extract multiplicity from Orca files.
 
     :param content:  opened and read file (.inp or .out)
+    :param MultOrCharge: 2 if Multiplicity, 1 if Charge
     :return: multiplicity (int)
     """
     target = content.find("xyz")
     endtar = content[target:].find('\n') + target
 
-    return content[target:endtar].split()[2]
+    return content[target:endtar].split()[MultOrCharge]
 
 
 def GetHeavyAtom(string):

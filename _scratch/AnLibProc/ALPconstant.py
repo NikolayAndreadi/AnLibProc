@@ -18,7 +18,8 @@ FAILEDPATH = "./FILES/3.Failed/"
 MP2CONVGEDPATH = "./FILES/4.Done-MP2/"
 
 # field names in CSV
-CSVHEADER = ["Filename", "TheoryLvl", "Element", "Multip", "Status", "Errcode", "Iter_num"]
+CSVHEADER = ["Filename", "TheoryLvl", "Element", "Charge",
+             "Multip", "Status", "Errcode", "Iter_num"]
 
 # list of heavy elements
 HEAVYLIST = ["Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf"]

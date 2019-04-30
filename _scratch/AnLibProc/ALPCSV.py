@@ -17,13 +17,14 @@ def CreateCSV():
             writer.writeheader()
 
 
-def AddLineCSV(fn, tl, el, mp, st, err=0, iter_num=0):
+def AddLineCSV(fn, tl, el, cg, mp, st, err=0, iter_num=0):
     """
     Adding new task info to CSV
 
     :param fn: filename
     :param tl: theory level
     :param el: heavy element
+    :param cg: charge
     :param mp: multiplicity
     :param st: state
     :param err: error code
@@ -32,7 +33,7 @@ def AddLineCSV(fn, tl, el, mp, st, err=0, iter_num=0):
     """
     with open(DATAPATH, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow([fn, tl, el, mp, st, err, iter_num])
+        writer.writerow([fn, tl, el, cg, mp, st, err, iter_num])
 
 
 def GetValueCSV(fn, field):

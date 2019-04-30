@@ -81,8 +81,9 @@ def WatchFresh():
             else:
                 state = ST_FRESH
                 element = GetHeavyAtom(datafile)
-                multip = GetMpFromOrcaInp(datafile)
-                AddLineCSV(filename, theorylvl, element, multip, state)
+                multip = GetMpFromOrcaInp(datafile, 2)
+                chg = GetMpFromOrcaInp(datafile, 1)
+                AddLineCSV(filename, theorylvl, element, chg, multip, state)
 
 
 def WatchFromScratch():
@@ -107,7 +108,8 @@ def WatchFromScratch():
                 if GetValueCSV(filename, "TheoryLvl") == PBE0:
                     element = GetValueCSV(filename, "Element")
                     multip = GetValueCSV(filename, "Multip")
-                    MakeInputFile(filename, MP2, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
+                    charge = GetValueCSV(filename, "Charge")
+                    MakeInputFile(filename, MP2, element, charge, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
                     ChangeValueCSV(filename, "TheoryLvl", MP2)
                     FromProcessedToQueue(filename, MP2)
                     ChangeValueCSV(filename, "Status", ST_QUEUE)
@@ -131,23 +133,28 @@ def WatchFromScratch():
                     continue
 
                 multip = GetValueCSV(filename, "Multip")
-                MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file), True)
+                charge = GetValueCSV(filename, "Charge")
+                MakeInputFile(filename, theorylvl, element, charge,
+                              multip, GetOrcaOutXyz(FROMSCRATCHDIR + file), True)
                 FromProcessedToQueue(filename, theorylvl)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
 
             elif status == 5:  # create with HCore
                 element = GetValueCSV(filename, "Element")
                 theorylvl = GetValueCSV(filename, "TheoryLvl")
+                charge = GetValueCSV(filename, "Charge")
                 multip = GetValueCSV(filename, "Multip")
-                MakeInputFile(filename, theorylvl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file), False)
+                MakeInputFile(filename, theorylvl, element, charge,
+                              multip, GetOrcaOutXyz(FROMSCRATCHDIR + file), False)
                 FromProcessedToQueue(filename, theorylvl)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
 
             elif status == 4:  # wrong element, replace
                 element = GetHeavyAtom(GetOrcaOutXyz(FROMSCRATCHDIR + file))
                 multip = GetValueCSV(filename, "Multip")
+                charge = GetValueCSV(filename, "Charge")
                 tl = GetValueCSV(filename, "TheoryLvl")
-                MakeInputFile(filename, tl, element, 0, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
+                MakeInputFile(filename, tl, element, charge, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
                 FromProcessedToQueue(filename, tl)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
 
@@ -193,9 +200,11 @@ def WatchDoneToMult():
             filename = os.path.splitext(file)[0]
             xyz = GetOrcaOutXyz(MP2CONVGEDPATH+filename+".out")
             init_mult = GetValueCSV(filename, "Multip")
+            charge = GetValueCSV(filename, "Charge")
 
             for mult in range(int(init_mult)+2, MAXMULTIP, 2):
-                MakeInputFile(filename+"__"+str(mult), MULT, GetValueCSV(filename, "Element"), 0, mult, xyz)
+                MakeInputFile(filename+"__"+str(mult), MULT, GetValueCSV(filename, "Element"),
+                              charge, mult, xyz)
 
             ChangeValueCSV(filename, "Status", ST_QUEUE)
             ChangeValueCSV(filename, "TheoryLvl", MULT)
@@ -267,9 +276,14 @@ def WatchMult():
 
     ChangeValueCSV(curF, "Multip", optMP)
     ChangeValueCSV(curF, "Status", ST_MULT)
+
     source = FROMSCRATCHDIR + curF + ".gbw"
     if os.path.isfile(source):
         destin = MP2CONVGEDPATH + curF + ".gbw"
         os.rename(source, destin)
+
+    for file in os.listdir(SCRATCHDIR + "MULT/"):
+        if file != ".keep":
+            os.remove(SCRATCHDIR + "MULT/" + file)
 
 # End of module ALPWatchers
