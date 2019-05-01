@@ -197,6 +197,8 @@ def WatchDoneToMult():
     """
     for file in os.listdir(MP2CONVGEDPATH):
         if file.endswith(".out"):
+            if GetValueCSV(filename, "TheoryLvl") == "DONE+MULT":
+                continue
             filename = os.path.splitext(file)[0]
             xyz = GetOrcaOutXyz(MP2CONVGEDPATH+filename+".out")
             init_mult = GetValueCSV(filename, "Multip")
