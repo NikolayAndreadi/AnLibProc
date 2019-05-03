@@ -151,9 +151,17 @@ def WatchFromScratch():
 
             elif status == 4:  # wrong element, replace
                 element = GetHeavyAtom(GetOrcaOutXyz(FROMSCRATCHDIR + file))
+                tl = GetValueCSV(filename, "TheoryLvl")
+                if element == 0:
+                    ChangeValueCSV(filename, "Status", ST_ERR)
+                    FromProcessedToError(filename, tl, False)
+                    ChangeValueCSV(filename, "Iter_num", 0)
+                    ChangeValueCSV(filename, "Errcode", "Bad element")
+                    continue
+
                 multip = GetValueCSV(filename, "Multip")
                 charge = GetValueCSV(filename, "Charge")
-                tl = GetValueCSV(filename, "TheoryLvl")
+
                 MakeInputFile(filename, tl, element, charge, multip, GetOrcaOutXyz(FROMSCRATCHDIR + file))
                 FromProcessedToQueue(filename, tl)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
@@ -197,9 +205,9 @@ def WatchDoneToMult():
     """
     for file in os.listdir(MP2CONVGEDPATH):
         if file.endswith(".out"):
-            if GetValueCSV(filename, "TheoryLvl") == "DONE+MULT":
-                continue
             filename = os.path.splitext(file)[0]
+            if GetValueCSV(filename, "TheoryLvl") == ST_MULT:
+                continue
             xyz = GetOrcaOutXyz(MP2CONVGEDPATH+filename+".out")
             init_mult = GetValueCSV(filename, "Multip")
             charge = GetValueCSV(filename, "Charge")
@@ -264,7 +272,7 @@ def WatchMult():
                 optMP = elem[1]
             else:
                 ChangeValueCSV(curF, "Multip", optMP)
-                ChangeValueCSV(curF, "Status", ST_MULT)
+                ChangeValueCSV(curF, "TheoryLvl", ST_MULT)
                 source = FROMSCRATCHDIR + curF + ".gbw"
                 if os.path.isfile(source):
                     destin = MP2CONVGEDPATH + curF + ".gbw"
@@ -277,7 +285,7 @@ def WatchMult():
             optMP = elem[1]
 
     ChangeValueCSV(curF, "Multip", optMP)
-    ChangeValueCSV(curF, "Status", ST_MULT)
+    ChangeValueCSV(curF, "TheoryLvl", ST_MULT)
 
     source = FROMSCRATCHDIR + curF + ".gbw"
     if os.path.isfile(source):
@@ -285,7 +293,14 @@ def WatchMult():
         os.rename(source, destin)
 
     for file in os.listdir(SCRATCHDIR + "MULT/"):
-        if file != ".keep":
+        if file.endswith(".out"):
+            filename = os.path.splitext(file)[0] + ".inp"
             os.remove(SCRATCHDIR + "MULT/" + file)
+            os.remove(SCRATCHDIR + "MULT/" + filename)
+
+    for file in os.listdir(SCRATCHDIR + "MULT/"):
+        if file != ".keep":
+            if not file.endswith(".inp"):
+                os.remove(SCRATCHDIR + "MULT/" + file)
 
 # End of module ALPWatchers

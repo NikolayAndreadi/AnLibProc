@@ -54,7 +54,12 @@ def GetHeavyAtom(string):
     :param string: xyz data set
     :return: heavy atom symbol
     """
-    return [x for x in HEAVYLIST if re.search(x, string)][0]
+    try:
+        res = [x for x in HEAVYLIST if re.search(x, string)][0]
+    except IndexError:
+        return 0
+    else:
+        return res
 
 
 def GetOrcaOutXyz(fn):
