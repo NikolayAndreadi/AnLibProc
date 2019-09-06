@@ -1,0 +1,20 @@
+!CCSD(T) DKH SARC/J DKH-def2-TZVP
+
+%pal
+nproc 20
+end
+
+%maxcore 31500
+
+%mdci
+  maxiter 500
+end
+ 
+%basis
+  newgto #HE "SARC-DKH-TZVP" end
+end
+ 
+%scf
+  MaxIter 5000
+end
+ 

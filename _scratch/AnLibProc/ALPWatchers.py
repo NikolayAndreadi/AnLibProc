@@ -28,7 +28,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MP2MININP:
-            run = "sbatch -N6 -c2 " + SCRATCHDIR + "MP2.sh -i" + SCRATCHDIR + "MP2/"
+            run = "sbatch -N9 -c3 -t 96:00:00 " + SCRATCHDIR + "MP2.sh -i" + SCRATCHDIR + "MP2/"
             os.system(run)
 
     if not IsInLomonosovSqueue(MULT):
@@ -37,7 +37,16 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MULTMININP:
-            run = "sbatch -N6 -c2 " + SCRATCHDIR + "MULT.sh -i" + SCRATCHDIR + "MULT/"
+            run = "sbatch -N6 -c2 -t 6:00:00 " + SCRATCHDIR + "MULT.sh -i" + SCRATCHDIR + "MULT/"
+            os.system(run)
+
+    if not IsInLomonosovSqueue(CC):
+        N = 0
+        for file in os.listdir(SCRATCHDIR + "CC/"):
+            if file.endswith(".inp"):
+                N += 1
+        if N >= MULTMININP:
+            run = "sbatch -N10 -c7 -t 24:00:00 " + SCRATCHDIR + "CC.sh -i" + SCRATCHDIR + "CC/"
             os.system(run)
 
 
@@ -55,11 +64,19 @@ def WatchFresh():
             f.close()
 
             theorylvl = "ERR"
-            for _ in datafile:
-                if PBE0 in datafile:
-                    theorylvl = PBE0
-                if MP2 in datafile:
-                    theorylvl = MP2
+
+            if PBE0 in datafile:
+                theorylvl = PBE0
+            elif MP2 in datafile:
+                theorylvl = MP2
+            elif "HF" in datafile:
+                # HF is a default setting in gabedit editor. Change to PBE0 template
+                theorylvl = PBE0
+                xyz = GetOrcaInpXyz(datafile)
+                heavyatom = GetHeavyAtom(xyz)
+                cg = GetMpFromOrcaInp(datafile, 1)
+                mp = GetMpFromOrcaInp(datafile, 2)
+                MakeInputFile(filename, theorylvl, heavyatom, cg, mp, xyz, False, FRESHDIRPATH)
 
             if theorylvl == "ERR":
                 source = FRESHDIRPATH + file
@@ -94,14 +111,14 @@ def WatchFromScratch():
     """
     FromQueueToProcessed(PBE0)
     FromQueueToProcessed(MP2)
-
     for file in os.listdir(FROMSCRATCHDIR):
+        print(file)
         if file.endswith(".out"):
             filename = os.path.splitext(file)[0]
+
             f = open(FROMSCRATCHDIR + file, "r")
             datafile = f.read()
             f.close()
-
             status = GetOrcaOutStatus(datafile)
 
             if status == 1:  # HURRAY
@@ -208,17 +225,35 @@ def WatchDoneToMult():
             filename = os.path.splitext(file)[0]
             if GetValueCSV(filename, "TheoryLvl") == ST_MULT:
                 continue
-            xyz = GetOrcaOutXyz(MP2CONVGEDPATH+filename+".out")
+            xyz = GetOrcaOutXyz(MP2CONVGEDPATH + filename + ".out")
             init_mult = GetValueCSV(filename, "Multip")
             charge = GetValueCSV(filename, "Charge")
 
-            for mult in range(int(init_mult)+2, MAXMULTIP, 2):
-                MakeInputFile(filename+"__"+str(mult), MULT, GetValueCSV(filename, "Element"),
+            for mult in range(int(init_mult) + 2, MAXMULTIP, 2):
+                MakeInputFile(filename + "__" + str(mult), MULT, GetValueCSV(filename, "Element"),
                               charge, mult, xyz)
 
             ChangeValueCSV(filename, "Status", ST_QUEUE)
             ChangeValueCSV(filename, "TheoryLvl", MULT)
 
+
+def WatchDoneToСС():
+    """
+    If there's some done geoms - start coupled clusters task
+
+    :return: None
+    """
+    for file in os.listdir(MP2CONVGEDPATH):
+        if file.endswith(".out"):
+            filename = os.path.splitext(file)[0]
+            if GetValueCSV(filename, "TheoryLvl") == ST_MULT:
+                xyz = GetOrcaOutXyz(MP2CONVGEDPATH + filename + ".out")
+                mult = GetValueCSV(filename, "Multip")
+                charge = GetValueCSV(filename, "Charge")
+                MakeInputFile(filename, CC, GetValueCSV(filename, "Element"),
+                              charge, mult, xyz)
+                ChangeValueCSV(filename, "Status", ST_QUEUE)
+                ChangeValueCSV(filename, "TheoryLvl", CC)
 
 def WatchMult():
     """
@@ -240,7 +275,7 @@ def WatchMult():
             filename = os.path.splitext(file)[0]
             filename = filename.split("__")
 
-            f = open(SCRATCHDIR + "MULT/"+file, "r")
+            f = open(SCRATCHDIR + "MULT/" + file, "r")
             content = f.read()
             f.close()
 
@@ -248,6 +283,7 @@ def WatchMult():
 
     def get__column(matrix, i):
         return [row[i] for row in matrix]
+
     Summ_names = get__column(Summary, 0)
     Summ_names = list(dict.fromkeys(Summ_names))
     for elem in Summ_names:
@@ -259,6 +295,10 @@ def WatchMult():
         Summary.append([elem, mp, en])
 
     Summary.sort(key=lambda x: x[0])
+
+    print("Name\tMP\tEnergy")
+    for elem in Summary:
+        print(elem[0], elem[1], elem[2])
 
     minE = 0
     optMP = 0

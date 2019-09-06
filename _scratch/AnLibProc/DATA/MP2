@@ -1,18 +1,17 @@
-!Opt MP2 DKH-def2-TZVP DKH SARC/J SlowConv
+!Opt RI-MP2 RIJCOSX DKH-def2-TZVP DKH SARC/J SlowConv
 
 %pal
 nproc 42
 end
 
-%maxcore 9000
+%maxcore 13500
 
 %basis
 newgto #HE "SARC-DKH-TZVP" end
 end
 
 %scf
-MaxIter 2000
-Guess HCore
+MaxIter 5000
 end
 
 %method

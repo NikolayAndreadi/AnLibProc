@@ -5,7 +5,7 @@ import re
 from ALPconstant import *
 
 
-def MakeInputFile(fn, tl, el, cg, mp, xyz, retry=False):
+def MakeInputFile(fn, tl, el, cg, mp, xyz, retry=False, custompath=""):
     """
     Generating .inp file
 
@@ -18,7 +18,12 @@ def MakeInputFile(fn, tl, el, cg, mp, xyz, retry=False):
     :param retry: if true - delete guess HCore line
     :return: None
     """
-    fn = SCRATCHDIR + '/' + tl + '/' + fn + ".inp"
+
+    if (custompath == ""):
+        fn = SCRATCHDIR + '/' + tl + '/' + fn + ".inp"
+    else:
+        fn = custompath + "/" + fn + ".inp"
+
     f = open(fn, 'w+')
 
     smp = open("./DATA/" + tl, 'r')
@@ -60,6 +65,21 @@ def GetHeavyAtom(string):
         return 0
     else:
         return res
+
+
+def GetOrcaInpXyz(content):
+    """
+    Get xyz from Orca out file.
+
+    :param content: inp file as string obj
+    :return: xyz data set
+    """
+
+    target = content.rfind("xyz")
+    target += content[target:].find("\n") + 1
+    endtar = content[target:].find("*")
+    endtar += target - 1
+    return content[target:endtar]
 
 
 def GetOrcaOutXyz(fn):

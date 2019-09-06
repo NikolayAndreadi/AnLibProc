@@ -12,10 +12,12 @@ FRESHDIRPATH = "./FILES/1.FRESH/"
 if platform.system() == "Windows":
     SCRATCHDIR = "../"
 else:
-    SCRATCHDIR = "/home/nikolayandreadi_1705/_scratch/"
+    SCRATCHDIR = "/home/nikolayandreadi_2125/_scratch/"
+
 FROMSCRATCHDIR = "./FILES/2.FromScratch/"
 FAILEDPATH = "./FILES/3.Failed/"
 MP2CONVGEDPATH = "./FILES/4.Done-MP2/"
+CCCONVGEDPATH = "./FILES/5.Done-CC/"
 
 # field names in CSV
 CSVHEADER = ["Filename", "TheoryLvl", "Element", "Charge",
@@ -28,6 +30,7 @@ HEAVYLIST = ["Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf"]
 PBE0 = "PBE0"
 MP2 = "MP2"
 MULT = "MULT"
+CC = "CC"
 
 # Check orca out statuses:
 # return 0 if unknoun problem
@@ -57,11 +60,14 @@ ST_ERR = "ERR"
 ST_DONE = "DONE"
 # when target multiplicity is found out
 ST_MULT = "DONE+MULT"
+#last step
+ST_CC = "DONE+CC"
 
 # min files needed for script to run
 PBE0MININP = 1
 MP2MININP = 1
 MULTMININP = 2
+CCMININP = 1
 
 # max multiplicity for mp-search task
 MAXMULTIP = 7
@@ -70,4 +76,4 @@ MAXMULTIP = 7
 MAX_ITER = 3
 
 # SQUEUE LOMONOSOV SHELL COMMAND
-LOMSQUEUECMD = "squeue -u nikolayandreadi_1705"
+LOMSQUEUECMD = "squeue -u nikolayandreadi_2125"

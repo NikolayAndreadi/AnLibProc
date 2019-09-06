@@ -1,9 +1,18 @@
 from ALPWatchers import *
 
+print("CSV")
 CreateCSV()
+print("Fresh")
 WatchFresh()
+print("Fresh2Queue")
 WatchFreshToQueue()
+print("FromScratch")
 WatchFromScratch()
+print("Done2Mult")
 WatchDoneToMult()
+print("Mult")
 WatchMult()
+print("WatchScript")
 WatchLomonosovScript()
+print("WatchDoneToCC")
+WatchDoneToСС()
