@@ -107,6 +107,7 @@ def GetOrcaOutStatus(content):
     :param content: opened and read .out file
     :return: status or 0 if unknown error occures
     """
+
     for key, val in STATUS.items():
         if val in content:
             return key

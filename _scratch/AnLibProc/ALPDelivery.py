@@ -107,6 +107,11 @@ def FromProcessedToDone(fn):
     destin = MP2CONVGEDPATH + fn + ".out"
     os.rename(source, destin)
 
+    f = FROMSCRATCHDIR + fn + ".gbw"
+    if os.path.isfile(f):
+        destin = MP2CONVGEDPATH + fn + ".gbw"
+        os.rename(f, destin)
+
 
 def FromProcessedToQueue(fn, tl):
     """

@@ -42,7 +42,8 @@ STATUS = {
     5: "Error encountered when trying to calculate the atomic fitting density!",
     6: "THE CP-SCF CALCULATION IS UNCONVERGED",
     7: "The lambda equations have not converged",
-    8: "OUT OF MEMORY ERROR"
+    8: "OUT OF MEMORY ERROR",
+    666: "CCSD(T)"
 }
 
 """

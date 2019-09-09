@@ -37,7 +37,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MULTMININP:
-            run = "sbatch -N6 -c2 -t 6:00:00 " + SCRATCHDIR + "MULT.sh -i" + SCRATCHDIR + "MULT/"
+            run = "sbatch -N6 -c2 -t 72:00:00 " + SCRATCHDIR + "MULT.sh -i" + SCRATCHDIR + "MULT/"
             os.system(run)
 
     if not IsInLomonosovSqueue(CC):
@@ -111,6 +111,8 @@ def WatchFromScratch():
     """
     FromQueueToProcessed(PBE0)
     FromQueueToProcessed(MP2)
+    FromQueueToProcessed(CC)
+
     for file in os.listdir(FROMSCRATCHDIR):
         print(file)
         if file.endswith(".out"):
@@ -183,6 +185,18 @@ def WatchFromScratch():
                 FromProcessedToQueue(filename, tl)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
 
+            elif status == 666:  # CC task, the last check
+                source = FROMSCRATCHDIR + filename + ".out"
+                destin = CCCONVGEDPATH + filename + ".out"
+                os.rename(source, destin)
+
+                source = FROMSCRATCHDIR + filename + ".gbw"
+                if os.path.isfile(source):
+                    destin = CCCONVGEDPATH + filename + ".gbw"
+                    os.rename(source, destin)
+
+                ChangeValueCSV(filename, "Status", ST_CC)
+
             else:  # HOUSTON WE HAVE A PR...
                 ChangeValueCSV(filename, "Status", ST_ERR)
                 theorylvl = GetValueCSV(filename, "TheoryLvl")
@@ -239,7 +253,7 @@ def WatchDoneToMult():
 
 def WatchDoneToСС():
     """
-    If there's some done geoms - start coupled clusters task
+    If there's some done geoms with mult - start coupled cluster task
 
     :return: None
     """
@@ -254,6 +268,12 @@ def WatchDoneToСС():
                               charge, mult, xyz)
                 ChangeValueCSV(filename, "Status", ST_QUEUE)
                 ChangeValueCSV(filename, "TheoryLvl", CC)
+
+                f = MP2CONVGEDPATH + filename + ".gbw"
+                if os.path.isfile(f):
+                    destin = SCRATCHDIR + CC + '/' + filename + ".gbw"
+                    os.rename(f, destin)
+
 
 def WatchMult():
     """
