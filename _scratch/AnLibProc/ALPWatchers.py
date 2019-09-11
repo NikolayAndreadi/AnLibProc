@@ -28,7 +28,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MP2MININP:
-            run = "sbatch -N9 -c3 -t 96:00:00 " + SCRATCHDIR + "MP2.sh -i" + SCRATCHDIR + "MP2/"
+            run = "sbatch -N9 -c3 -t 72:00:00 " + SCRATCHDIR + "MP2.sh -i" + SCRATCHDIR + "MP2/"
             os.system(run)
 
     if not IsInLomonosovSqueue(MULT):
@@ -37,7 +37,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MULTMININP:
-            run = "sbatch -N6 -c2 -t 72:00:00 " + SCRATCHDIR + "MULT.sh -i" + SCRATCHDIR + "MULT/"
+            run = "sbatch -N6 -c2 -t 12:00:00 " + SCRATCHDIR + "MULT.sh -i" + SCRATCHDIR + "MULT/"
             os.system(run)
 
     if not IsInLomonosovSqueue(CC):
@@ -46,7 +46,7 @@ def WatchLomonosovScript():
             if file.endswith(".inp"):
                 N += 1
         if N >= MULTMININP:
-            run = "sbatch -N10 -c7 -t 24:00:00 " + SCRATCHDIR + "CC.sh -i" + SCRATCHDIR + "CC/"
+            run = "sbatch -N10 -c7 -t 72:00:00 " + SCRATCHDIR + "CC.sh -i" + SCRATCHDIR + "CC/"
             os.system(run)
 
 
@@ -237,8 +237,12 @@ def WatchDoneToMult():
     for file in os.listdir(MP2CONVGEDPATH):
         if file.endswith(".out"):
             filename = os.path.splitext(file)[0]
+
             if GetValueCSV(filename, "TheoryLvl") == ST_MULT:
                 continue
+            if GetValueCSV(filename, "TheoryLvl") == ST_CC:
+                continue
+
             xyz = GetOrcaOutXyz(MP2CONVGEDPATH + filename + ".out")
             init_mult = GetValueCSV(filename, "Multip")
             charge = GetValueCSV(filename, "Charge")
