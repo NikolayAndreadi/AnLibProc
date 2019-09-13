@@ -18,6 +18,13 @@ def FromFreshToQueue(fn, tl):
     destin = SCRATCHDIR + tl + '/' + fn + ".inp"
     os.rename(source, destin)
 
+    source = FRESHDIRPATH + fn + ".gbw"
+    if os.path.isfile(source):
+        destin = SCRATCHDIR + tl + '/' + fn + ".gbw"
+        os.rename(source, destin)
+
+
+
 
 def IsInLomonosovSqueue(tl):
     """
